@@ -1,0 +1,59 @@
+program sweeper;
+
+{.$define DEBUG}
+
+const
+  TMRLO = 256-34;
+
+var
+  LED : sbit at GP2_bit;
+  SPK : sbit at GP0_bit;
+  T0L, T0I, TLED : byte;
+
+begin
+  CMCON:=7;
+  ANSEL:=0;
+  OPTION_REG:=%11011111;
+  TRISIO0_bit:=0;
+  TRISIO2_bit:=0;
+  T0L:=TMRLO;
+
+  TMR1CS_bit:=0;
+  T1CKPS1_bit:=1;
+  T1CKPS0_bit:=1;
+  TMR1L:=0;
+  TMR1H:=0;
+  TMR1IF_bit:=0;
+  TMR1ON_bit:=1;
+
+  TMR0:=T0L;
+  T0IF_bit:=0;
+  TLED:=0;
+
+  Delay_100ms;
+  
+  while true do begin
+    if T0IF_bit=1 then begin
+      SPK:=not SPK;
+      TMR0:=T0L;
+      T0IF_bit:=0;
+    end;
+    if T1IF_bit=1 then begin
+      Inc(TLED);
+      LED:=not LED;
+      TLED:=TLED and 7;
+      ClrWDT;
+      if TLED=7 then begin
+        {$IFDEF DEBUG}
+        T0I:=0;
+        {$ELSE}
+        T0I:=Hi(rand()) mod 16;
+        {$ENDIF}
+        T0L:=TMRLO+T0I;
+      end;
+      TMR1L:=0;
+      TMR1H:=0;
+      T1IF_bit:=0;
+    end;
+  end;
+end.
