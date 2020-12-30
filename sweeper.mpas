@@ -8,7 +8,7 @@ const
 var
   LED : sbit at GP2_bit;
   SPK : sbit at GP0_bit;
-  T0L, T0I, TLED : byte;
+  T0L, T0I, TLED, TSPK : byte;
 
 begin
   CMCON:=7;
@@ -29,12 +29,15 @@ begin
   TMR0:=T0L;
   T0IF_bit:=0;
   TLED:=0;
+  TSPK:=0;
 
   Delay_100ms;
   
   while true do begin
     if T0IF_bit=1 then begin
-      SPK:=not SPK;
+      Inc(TSPK);
+      if TSPK and 1<>0 then
+        SPK:=not SPK;
       TMR0:=T0L;
       T0IF_bit:=0;
     end;
