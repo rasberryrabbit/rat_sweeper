@@ -1,6 +1,7 @@
 program sweeper;
 
 {.$define DEBUG}
+{$define USE_HIGH_FREQ}
 
 const
   TMRLO = 256-34;
@@ -36,7 +37,9 @@ begin
   while true do begin
     if T0IF_bit=1 then begin
       Inc(TSPK);
+      {$ifndef USE_HIGH_FREQ}
       if TSPK and 1<>0 then
+      {$endif}
         SPK:=not SPK;
       TMR0:=T0L;
       T0IF_bit:=0;
