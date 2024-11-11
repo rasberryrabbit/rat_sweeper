@@ -4,7 +4,7 @@ program sweeper;
 {$define USE_HIGH_FREQ}
 
 const
-  TMRLO = 256-34;
+  TMRLO = 256-50;  // 24kHz, 28kHz, 33kHz
 
 var
   LED : sbit at GP2_bit;
