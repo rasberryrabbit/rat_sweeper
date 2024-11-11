@@ -10,6 +10,19 @@ var
   LED : sbit at GP2_bit;
   SPK : sbit at GP0_bit;
   T0L, T0I, TLED, TSPK : byte;
+  
+procedure interrupt(); iv 0x0004; ics ICS_AUTO;
+begin
+    if T0IF_bit=1 then begin
+      Inc(TSPK);
+      {$ifndef USE_HIGH_FREQ}
+      if TSPK and 1<>0 then
+      {$endif}
+        SPK:=not SPK;
+      TMR0:=T0L;
+      T0IF_bit:=0;
+    end;
+end;
 
 begin
   CMCON:=7;
@@ -31,19 +44,12 @@ begin
   T0IF_bit:=0;
   TLED:=0;
   TSPK:=0;
+  
+  INTCON:=%10100000;
 
   Delay_100ms;
   
   while true do begin
-    if T0IF_bit=1 then begin
-      Inc(TSPK);
-      {$ifndef USE_HIGH_FREQ}
-      if TSPK and 1<>0 then
-      {$endif}
-        SPK:=not SPK;
-      TMR0:=T0L;
-      T0IF_bit:=0;
-    end;
     if T1IF_bit=1 then begin
       Inc(TLED);
       LED:=not LED;
