@@ -47,9 +47,9 @@ begin
     if T1IF_bit=1 then begin
       Inc(TLED);
       LED:=not LED;
-      TLED:=TLED and 7;
+      TLED:=TLED and 31;
       ClrWDT;
-      if TLED=7 then begin
+      if TLED=31 then begin
         {$IFDEF DEBUG}
         T0I:=0;
         {$ELSE}
