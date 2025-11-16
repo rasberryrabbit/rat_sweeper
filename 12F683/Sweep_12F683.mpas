@@ -1,0 +1,94 @@
+program Sweep_12F683;
+
+
+const
+   TMR1H_LOAD=$9E;
+   TMR1L_LOAD=$57;   // 2000000 / (8 * 25000) = 10
+
+var
+   TICK_100: byte;
+   LED:sbit at GP0_bit;
+   LED_last: byte;
+   PWM_last, PWM_int, PWM_delta: byte;
+
+procedure Interrupt(); iv 0x0004; ics ICS_AUTO;
+begin
+     if T1IF_bit=1 then begin
+       TMR1H:=TMR1H_LOAD;
+       TMR1L:=TMR1L_LOAD;
+       T1IF_bit:=0;
+       Inc(TICK_100);
+     end;
+end;
+
+function TickDiff(cur, pre, limit: byte):Boolean;
+var
+  diff: byte;
+begin
+  if cur<pre then
+    diff:=cur+(255-pre)+1
+    else
+      diff:=cur-pre;
+  Result:=diff>=limit;
+end;
+
+procedure SetPWMFreq(delta:byte);
+begin
+     while TMR2IF_bit=0 do ;
+     PR2:=99-delta;
+     CCPR1L:=(PR2+1) shr 1;
+end;
+
+begin
+     OSCCON:=$70;        // 8MHz
+     CMCON0:=7;
+     ANSEL:=%00000000;   // 00001001
+
+     TRISIO0_bit:=0;     // LED -> Output
+
+     // Timer2 PWM
+     TRISIO2_bit:=1;
+     PR2:=99;            // 2000000 / (99+1) = 20000Hz
+     CCP1CON:=%00001100;
+     CCPR1L:=50;
+     TMR2IF_bit:=0;
+     T2CON:=%00000100;
+     TRISIO2_bit:=0;
+
+     PWM_last:=0;
+     ClrWDT;
+
+     LED:=0;
+     LED_last:=0;
+     
+     // Timer1, prescaler = 11(8)
+     T1CON:=%00110000;
+     TMR1IF_bit:=0;
+     TICK_100:=0;
+     
+     Delay_100ms;
+     ClrWDT;
+
+     TMR1IE_bit:=1;
+     PEIE_bit:=1;
+     GIE_bit:=1;
+     TMR1ON_bit:=1;       // Timer1
+
+     while True do begin
+       // LED
+       if TickDiff(TICK_100,LED_last,10) then
+       begin
+         LED:=not LED;
+         LED_last:=TICK_100;
+         ClrWDT;
+       end;
+       // PWM
+       if TickDiff(TICK_100,PWM_last,PWM_int) then
+       begin
+         PWM_int:=rand() mod 60+30;
+         PWM_delta:=rand() mod 30;
+         SetPWMFreq(PWM_delta);
+         PWM_last:=TICK_100;
+       end;
+     end;
+end.
