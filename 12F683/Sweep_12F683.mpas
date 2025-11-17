@@ -42,7 +42,7 @@ end;
 begin
      OSCCON:=$70;        // 8MHz
      CMCON0:=7;
-     ANSEL:=%00000000;   // 00001001
+     ANSEL:=%00000000;   // ADC not used
 
      TRISIO0_bit:=0;     // LED -> Output
 

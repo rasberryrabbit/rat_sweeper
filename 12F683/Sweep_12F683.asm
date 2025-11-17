@@ -108,7 +108,7 @@ _main:
 ;Sweep_12F683.mpas,44 :: 		CMCON0:=7;
 	MOVLW      7
 	MOVWF      CMCON0+0
-;Sweep_12F683.mpas,45 :: 		ANSEL:=%00000000;   // 00001001
+;Sweep_12F683.mpas,45 :: 		ANSEL:=%00000000;   // ADC not used
 	CLRF       ANSEL+0
 ;Sweep_12F683.mpas,47 :: 		TRISIO0_bit:=0;     // LED -> Output
 	BCF        TRISIO0_bit+0, BitPos(TRISIO0_bit+0)
