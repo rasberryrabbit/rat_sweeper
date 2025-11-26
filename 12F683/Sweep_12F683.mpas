@@ -33,10 +33,17 @@ begin
 end;
 
 procedure SetPWMFreq(delta:byte);
+var
+  pwm, cc: Byte;
 begin
      while TMR2IF_bit=0 do ;
-     PR2:=99-delta;
-     CCPR1L:=(PR2+1) shr 1;
+     pwm:=99-delta;
+     PR2:=pwm;
+     Inc(pwm);
+     cc:=2*pwm;    // 0.5 * 4 * (PR2+1)
+     CCPR1L:=cc shr 2;
+     DC1B1_bit:=cc.1;
+     DC1B0_bit:=cc.0;
 end;
 
 begin
